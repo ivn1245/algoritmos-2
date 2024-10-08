@@ -55,15 +55,34 @@ public class ListaEnlazada<T> implements Secuencia<T> {
     public T obtener(int i) {
         Nodo posicion = this.primero;
         int indice = 0;
-        while (indice != i){
-            posicion = this.primero.sig;
-            indice+=1;
+        while (indice < i){
+            posicion = posicion.sig;
+            indice++;
         }
         return posicion.valor;
     }
 
     public void eliminar(int i) {
-        throw new UnsupportedOperationException("No implementada aun");
+        Nodo posicion = this.primero;
+        int indice = 0;
+        while (indice < i){
+            posicion = posicion.sig;
+            indice++;
+        }
+        if (posicion.ant==null && posicion.sig==null){
+            this.primero = null;
+            this.ultimo = null;
+        } else if (posicion.ant==null){
+            posicion.sig.ant=null;
+            this.primero = posicion.sig;
+        } else if (posicion.sig==null){
+            posicion.ant.sig=null;
+            this.ultimo = posicion.ant;
+        } else {
+        posicion.ant.sig=posicion.sig;
+        posicion.sig.ant=posicion.ant;
+        }
+        this.largo --;
     }
 
     public void modificarPosicion(int indice, T elem) {
