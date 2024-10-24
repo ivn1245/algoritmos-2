@@ -108,28 +108,101 @@ public class ABB<T extends Comparable<T>> implements Conjunto<T> {
         return pertenece;
     }
 
-    public void eliminar(T elem){
-        throw new UnsupportedOperationException("No implementada aun");
+    public void eliminar(T elem) {
+        if (this.pertenece(elem)){
+            this.raiz = eliminarRecursivo(this.raiz, elem);
+        }
+    }
+
+    private Nodo eliminarRecursivo(Nodo nodo, T elem) {
+        if (nodo == null) {
+            return null;
+        }
+        int comparacion = elem.compareTo(nodo.valor);
+        if (comparacion < 0) {
+            nodo.menor = eliminarRecursivo(nodo.menor, elem);
+        } else if (comparacion > 0) {
+            nodo.mayor = eliminarRecursivo(nodo.mayor, elem);
+        } else {
+            if (nodo.menor == null && nodo.mayor == null) {
+                this.longitud--;
+                return null;
+            }
+            if (nodo.menor == null) {
+                this.longitud--;
+                return nodo.mayor;
+            } else if (nodo.mayor == null) {
+                this.longitud--;
+                return nodo.menor;
+            }
+            Nodo sucesor = encontrarMinimo(nodo.mayor);
+            nodo.valor = sucesor.valor;  
+            nodo.mayor = eliminarRecursivo(nodo.mayor, sucesor.valor);  
+        }
+        return nodo;
+    }
+
+    private Nodo encontrarMinimo(Nodo nodo) {
+        while (nodo.menor != null) {
+            nodo = nodo.menor;
+        }
+        return nodo;
     }
 
     public String toString(){
-        throw new UnsupportedOperationException("No implementada aun");
+        StringBuffer evento = new StringBuffer();
+        Iterador iterador = this.iterador();
+        evento.append("{");
+        if (iterador.haySiguiente()!=false){
+            evento.append(iterador.siguiente());
+            while (iterador.haySiguiente()){
+                evento.append(",");
+                evento.append(iterador.siguiente().toString());
+            }
+        }
+        evento.append("}");
+        return evento.toString();
     }
 
     private class ABB_Iterador implements Iterador<T> {
-        private Nodo _actual;
+        private Nodo actual;
 
-        public boolean haySiguiente() {            
-            throw new UnsupportedOperationException("No implementada aun");
+        public boolean haySiguiente() {
+            boolean hay = false;            
+            while (actual.padre!=null){
+                if (actual.padre.mayor!=actual){
+                    hay=true;
+                }
+            }
+            if (actual.mayor == null){
+                hay=false;
+            }
+            return hay;
         }
     
         public T siguiente() {
-            throw new UnsupportedOperationException("No implementada aun");
+            if (actual.mayor!=null){
+                actual = encontrarMinimo(actual.mayor);
+            } else if (actual.mayor==null) {
+                while (actual.padre.mayor==actual){
+                    actual=actual.padre;
+                }
+                actual=actual.padre;
+            }
+            return actual.valor;
         }
     }
 
     public Iterador<T> iterador() {
-        return new ABB_Iterador();
+        ABB_Iterador nuevo = new ABB_Iterador();
+        Nodo minimo = new Nodo(null);
+        Nodo comienzo = new Nodo(null);
+        nuevo.actual = comienzo;
+        if (this.raiz!=null){
+            minimo = encontrarMinimo(this.raiz);
+            nuevo.actual.padre = minimo;
+        }
+        return nuevo;
     }
 
 }
